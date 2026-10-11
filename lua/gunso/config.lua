@@ -8,7 +8,11 @@ M.defaults = {
 		width = 6,
 		height = 3,
 
-		border = "rounded",
+		border = {
+			type = "rounded",
+			bg = "NONE",
+			opacity = 1,
+		},
 
 		zindex = 2,
 	},
@@ -37,6 +41,15 @@ M.defaults = {
 M.options = {}
 
 function M.setup(options)
+	options = options or {}
+	local border = options.panel and options.panel.border
+
+	-- Keep accepting the previous string and array forms of panel.border.
+	if type(border) == "string" or (type(border) == "table" and border.type == nil) then
+		options = vim.deepcopy(options)
+		options.panel.border = { type = border }
+	end
+
 	M.options = vim.tbl_deep_extend("force", {}, M.defaults, options or {})
 end
 

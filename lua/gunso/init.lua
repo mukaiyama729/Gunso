@@ -10,14 +10,21 @@ local M = {}
 -- highlight
 -- ---------------------------------------
 
-local function setup_highlights()
+local function setup_highlights(config)
+	local border = config.options.panel.border
+	local hl = vim.api.nvim_get_hl(0, { name = "FloatBorder", link = false })
+	local border_bg = type(border) == "table" and border.bg or hl.bg
+	local opacity = type(border) == "table" and border.opacity or nil
+	local blend = type(opacity) == "number" and math.floor((1 - math.max(0, math.min(1, opacity))) * 100 + 0.5) or nil
 	vim.api.nvim_set_hl(0, "GunsoNormal", {
 		bg = "NONE",
 		default = true,
 	})
 
 	vim.api.nvim_set_hl(0, "GunsoBorder", {
-		link = "FloatBorder",
+		fg = hl.fg,
+		bg = border_bg,
+		blend = blend,
 		default = true,
 	})
 end
@@ -258,7 +265,9 @@ local function setup_autocmds()
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		group = group,
 
-		callback = setup_highlights,
+		callback = function()
+			setup_highlights(config)
+		end,
 	})
 
 	--
@@ -286,7 +295,7 @@ function M.setup(opts)
 		processor = config.options.image.processor,
 	})
 
-	setup_highlights()
+	setup_highlights(config)
 	setup_commands()
 	setup_autocmds()
 
