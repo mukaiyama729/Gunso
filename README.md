@@ -3,6 +3,10 @@
 A small animated walking companion for Neovim. Gunso displays the included
 sprite frames in a floating window and advances the animation as you type.
 
+## Demo
+
+![Gunso walking in Neovim](assets/gunso-demo.gif)
+
 ## Requirements
 
 - Neovim
@@ -36,7 +40,7 @@ Add this plugin specification to your Lazy plugin files:
   opts = {
     -- Optional: these are the defaults. The frames ship with the plugin.
     frames = { "walk_1.png", "walk_2.png", "walk_3.png" },
-    move_step = 1,
+    move_step = 0,
     keys_per_step = 1,
   },
 }
@@ -65,8 +69,12 @@ Pass options through the plugin specification's `opts` table, or call
 ```lua
 require("gunso").setup({
   frames = { "walk_1.png", "walk_2.png", "walk_3.png" },
-  move_step = 0, -- keep Gunso in place horizontally
+  move_step = 1, -- move one cell to the right on each animation step
   keys_per_step = 2,
+  panel = {
+    row = 2,
+    col = 5,
+  },
   image = {
     backend = "auto", -- "kitty", "sixel", or "ueberzug" also accepted
     processor = "magick_cli",
@@ -76,17 +84,45 @@ require("gunso").setup({
 })
 ```
 
+Options are merged deeply with the defaults, so nested tables such as `panel`
+and `image` only need the values you want to change. Call `setup()` once during
+startup; Gunso configures `image.nvim` with the selected backend and processor.
+
 Available options and defaults:
 
 | Option | Default | Description |
 | --- | --- | --- |
 | `frames` | bundled walking frames | Ordered image filenames under `assets/`, or absolute paths |
-| `move_step` | `1` | Horizontal movement per animation step; set to `0` to stay still |
+| `move_step` | `0` | Horizontal movement in cells per animation step; set a positive value to move right |
 | `keys_per_step` | `1` | Number of key presses before advancing one frame |
+| `panel.row` | `2` | Offset in rows from the bottom edge of Neovim |
+| `panel.col` | `5` | Offset in columns from the right edge of Neovim |
+| `panel.width` | `6` | Floating panel width in cells |
+| `panel.height` | `3` | Floating panel height in cells |
+| `panel.border.type` | `"rounded"` | Neovim floating-window border style; a border string may also be used directly as `panel.border` |
+| `panel.border.bg` | `"NONE"` | Border background highlight color |
+| `panel.border.opacity` | `1` | Border opacity from `0` (transparent) to `1` (opaque) |
+| `panel.zindex` | `2` | Floating panel stacking order |
 | `image.backend` | `"auto"` | Image.nvim rendering backend |
 | `image.processor` | `"magick_cli"` | Image.nvim image processor |
 | `image.width` | `5` | Rendered image width in cells |
 | `image.height` | `3` | Rendered image height in cells |
+| `image.y` | `0` | Vertical offset of the image inside the panel |
+| `image.max_height_window_percentage` | `100` | Maximum image height relative to its window, passed to image.nvim |
+
+For example, this keeps the companion stationary but changes its placement and
+appearance:
+
+```lua
+require("gunso").setup({
+  panel = {
+    row = 1,
+    col = 2,
+    border = { type = "single", bg = "NONE", opacity = 0.8 },
+  },
+  image = { width = 6, height = 4, y = 0 },
+})
+```
 
 ## License
 
